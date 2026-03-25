@@ -8,17 +8,17 @@
 @tailwind components;
 @tailwind utilities;
 @layer base {
-  body {
-    @apply bg-gray-100 text-text font-sans antialiased;
-  }
-  /* Hide scrollbar for clean mobile look */
-  ::-webkit-scrollbar {
-    width: 0px;
-    background: transparent;
-  }
+    body {
+        @apply bg-gray-100 text-text font-sans antialiased;
+    }
+    /* Hide scrollbar for clean mobile look */
+    ::-webkit-scrollbar {
+        width: 0px;
+        background: transparent;
+    }
 }
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+    .text-balance {
+        text-wrap: balance;
+    }
 }
