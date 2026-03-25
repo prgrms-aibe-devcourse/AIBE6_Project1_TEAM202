@@ -17,7 +17,7 @@ export const ResultPage: React.FC = () => {
 
         사용자의 키워드를 기반으로 여행지를 추천해.
 
-        출력 형식:
+        출력 형식: 
         [
             {
                 "name": "장소 이름",
