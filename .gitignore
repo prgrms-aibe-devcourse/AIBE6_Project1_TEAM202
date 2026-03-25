@@ -12,8 +12,8 @@ dist
 dist-ssr
 *.local
 
-# env
-.env.local
+# key
+src/data/apikey.ts
 
 # Editor directories and files
 .vscode/*
