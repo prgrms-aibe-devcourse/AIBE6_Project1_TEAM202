@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import { BottomNav } from './components/Shared/Navigation'
+import { BottomNav } from './components/shared/Navigation'
 import { AuthProvider } from './contexts/AuthContext'
 import { CommunityPage } from './pages/Community/view/CommunityPage'
 import { CreatePostPage } from './pages/Community/view/CreatePostPage'

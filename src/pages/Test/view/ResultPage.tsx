@@ -1,29 +1,16 @@
 'use client'
-import { GoogleGenAI } from '@google/genai'
 import { motion } from 'framer-motion'
 import { HomeIcon, RotateCcwIcon, Share2Icon } from 'lucide-react'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { PlaceCard } from '../../../components/Shared/PlaceCard'
+import { PlaceCard } from '../../../components/shared/PlaceCard'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
 import { places, resultTypes, TravelType } from '../../../data/mockData'
 import createPlacecPrompt from '../../../data/prompt'
 
 export const ResultPage: React.FC = () => {
-    async function requestGemini(request: string) {
-        const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY })
-        const prompt = createPlacecPrompt(request)
-
-        const result = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-        })
-
-        if (result !== undefined) return result
-        else return console.log('AI 응답 실패')
-    }
-
+    const [data, setData] = useState(null)
     const { type } = useParams<{
         type: string
     }>()
@@ -37,9 +24,22 @@ export const ResultPage: React.FC = () => {
 
     if (!result) return null
 
-    const answer = requestGemini(result.title)
+    useEffect(() => {
+        const fetchData = async () => {
+            const fet = await fetch('http://localhost:5137/api/gemini', {
+                method: 'POST',
+                body: JSON.stringify({ prompt: createPlacecPrompt(result.title) }),
+                headers: { 'Content-Type': 'application/json' },
+            })
 
-    console.log(answer)
+            const fetchDataJson = await fet.json()
+            setData(fetchDataJson)
+
+            console.log(fetchDataJson)
+        }
+
+        fetchData()
+    }, [])
 
     const recommendedPlaces = places.filter((p) => p.type === result.id)
 
