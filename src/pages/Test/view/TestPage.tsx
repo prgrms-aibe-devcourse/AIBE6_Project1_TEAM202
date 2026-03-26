@@ -3,35 +3,37 @@ import { ChevronLeftIcon } from 'lucide-react'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card } from '../../../components/ui/Card'
-import { questions, TravelType } from '../../../data/mockData'
+import { useAuth } from '../../../contexts/AuthContext'
+import { questions } from '../../../data/mock/questions'
+import { AnswerOption, TravelType } from '../../../data/mockData'
+import { saveTestResult } from '../../../services/testCountApi'
 import { ProgressBar } from '../component/ProgressBar'
 export const TestPage: React.FC = () => {
+    const { user } = useAuth()
     const navigate = useNavigate()
     const [currentIndex, setCurrentIndex] = useState(0)
     const [answers, setAnswers] = useState<TravelType[]>([])
     const [direction, setDirection] = useState(1)
     const currentQuestion = questions[currentIndex]
-    const handleAnswer = (type: TravelType) => {
-        const newAnswers = [...answers, type]
+
+    const handleAnswer = async (option: AnswerOption) => {
+        const newAnswers = [...answers, option]
         setAnswers(newAnswers)
         if (currentIndex < questions.length - 1) {
             setDirection(1)
             setCurrentIndex(currentIndex + 1)
         } else {
-            // Calculate result
-            const counts = newAnswers.reduce(
-                (acc, curr) => {
-                    acc[curr] = (acc[curr] || 0) + 1
-                    return acc
-                },
-                {} as Record<TravelType, number>,
-            )
-            const resultType = Object.keys(counts).reduce((a, b) =>
-                counts[a as TravelType] > counts[b as TravelType] ? a : b,
-            ) as TravelType
-            navigate(`/result/${resultType}`, {
-                replace: true,
-            })
+            const scores = calculateScores(newAnswers)
+            const maxScore = Math.max(...Object.values(scores))
+            const topKeys = (Object.keys(scores) as TravelType[]).filter((k) => scores[k] === maxScore)
+            const resultType = topKeys.sort((a, b) => priorityOrder.indexOf(a) - priorityOrder.indexOf(b))[0]
+
+            try {
+                await saveTestResult(resultType, user?.id)
+            } catch (error) {
+                console.error('테스트 결과 저장 실패', error)
+            }
+            navigate(`/result/${resultType}`, { replace: true })
         }
     }
     const handleBack = () => {

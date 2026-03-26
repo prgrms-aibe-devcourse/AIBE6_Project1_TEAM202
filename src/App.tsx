@@ -1,10 +1,11 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { BottomNav } from './components/shared/Navigation'
+import { RouteIndicator } from './components/shared/RouteIndicator'
 import { AuthProvider } from './contexts/AuthContext'
+import { DetailPostPage } from './pages/Community/view'
 import { CommunityPage } from './pages/Community/view/CommunityPage'
 import { CreatePostPage } from './pages/Community/view/CreatePostPage'
-import { DetailPage } from './pages/DetailPage'
-import { HomePage } from './pages/Home/HomePage'
+import { HomePage } from './pages/Home/view/HomePage'
 import { LoginPage } from './pages/MyPage/view/LoginPage'
 import { MyPage } from './pages/MyPage/view/MyPage'
 import { SignupPage } from './pages/MyPage/view/SignupPage'
@@ -17,12 +18,13 @@ export function App() {
                 {/* Mobile App Container Wrapper */}
                 <div className="min-h-screen bg-gray-100 flex justify-center">
                     <div className="relative w-full max-w-md h-screen bg-background flex flex-col overflow-hidden">
+                        <RouteIndicator />
                         <div className="flex-1 overflow-y-auto pb-20 relative hide-scrollbar">
                             <Routes>
                                 <Route path="/" element={<HomePage />} />
                                 <Route path="/test" element={<TestPage />} />
                                 <Route path="/result/:type" element={<ResultPage />} />
-                                <Route path="/place/:id" element={<DetailPage />} />
+                                <Route path="/place/:id" element={<DetailPostPage />} />
                                 <Route path="/community" element={<CommunityPage />} />
                                 <Route path="/login" element={<LoginPage />} />
                                 <Route path="/signup" element={<SignupPage />} />

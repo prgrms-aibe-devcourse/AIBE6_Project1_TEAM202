@@ -18,10 +18,10 @@ const filters: {
         id: 'HEALING',
         label: '🌿 힐링',
     },
-    {
-        id: 'CITY',
-        label: '🏙️ 도시',
-    },
+    // {
+    //     id: 'CITY',
+    //     label: '🏙️ 도시',
+    // },
     {
         id: 'FOOD',
         label: '🍜 맛집',
