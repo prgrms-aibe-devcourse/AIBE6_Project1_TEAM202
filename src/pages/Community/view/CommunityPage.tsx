@@ -37,7 +37,49 @@ export const CommunityPage: React.FC = () => {
     const { isAuthenticated } = useAuth()
     const [activeFilter, setActiveFilter] = useState<TravelType | 'ALL'>('ALL')
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
-    const filteredPosts = activeFilter === 'ALL' ? posts : posts.filter((post) => post.type === activeFilter)
+    const [allPosts, setAllPosts] = useState(posts)
+    const filteredPosts = activeFilter === 'ALL' ? allPosts : allPosts.filter((post) => post.type === activeFilter)
+
+    const handleLikeClick = (postId: string) => {
+        if (!isAuthenticated) {
+            setIsLoginModalOpen(true)
+            return
+        }
+
+        setAllPosts((prevPosts) =>
+            prevPosts.map((post) => {
+                if (post.id === postId) {
+                    return {
+                        ...post,
+                        isLiked: !post.isLiked,
+                        likeCount: post.isLiked ? post.likeCount - 1 : post.likeCount + 1,
+                    }
+                }
+                return post
+            }),
+        )
+    }
+
+    // 북마크 함수 구현
+    const handleBookmarkClick = (postId: string) => {
+        if (!isAuthenticated) {
+            setIsLoginModalOpen(true)
+            return
+        }
+
+        setAllPosts((prevPosts) =>
+            prevPosts.map((post) => {
+                if (post.id === postId) {
+                    return {
+                        ...post,
+                        isBookmarked: !post.isBookmarked,
+                    }
+                }
+                return post
+            }),
+        )
+    }
+
     const handleWriteClick = () => {
         if (isAuthenticated) {
             navigate('/create-post')
@@ -45,11 +87,7 @@ export const CommunityPage: React.FC = () => {
             setIsLoginModalOpen(true)
         }
     }
-    const handleProtectedAction = () => {
-        if (!isAuthenticated) {
-            setIsLoginModalOpen(true)
-        }
-    }
+
     return (
         <div className="min-h-full bg-background pb-24 pt-6 relative">
             <div className="px-6 mb-6 flex justify-between items-end">
@@ -93,8 +131,8 @@ export const CommunityPage: React.FC = () => {
                     >
                         <PostCard
                             post={post}
-                            onLikeClick={handleProtectedAction}
-                            onBookmarkClick={handleProtectedAction}
+                            onLikeClick={() => handleLikeClick(post.id)}
+                            onBookmarkClick={() => handleBookmarkClick(post.id)} // 북마크 함수 적용
                         />
                     </motion.div>
                 ))}
