@@ -7,13 +7,12 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { PlaceCard } from '../../../components/Shared/PlaceCard'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
-import { Gemini_API_KEY } from '../../../data/apikey'
 import { places, resultTypes, TravelType } from '../../../data/mockData'
 import createPlacecPrompt from '../../../data/prompt'
 
 export const ResultPage: React.FC = () => {
     async function requestGemini(request: string) {
-        const ai = new GoogleGenAI({ apiKey: Gemini_API_KEY })
+        const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY })
         const prompt = createPlacecPrompt(request)
 
         const result = await ai.models.generateContent({
@@ -21,7 +20,7 @@ export const ResultPage: React.FC = () => {
             contents: prompt,
         })
 
-        if (result !== undefined) return result.text
+        if (result !== undefined) return result
         else return console.log('AI 응답 실패')
     }
 
@@ -39,6 +38,8 @@ export const ResultPage: React.FC = () => {
     if (!result) return null
 
     const answer = requestGemini(result.title)
+
+    console.log(answer)
 
     const recommendedPlaces = places.filter((p) => p.type === result.id)
 
@@ -145,20 +146,7 @@ export const ResultPage: React.FC = () => {
                             delay: 0.3,
                         }}
                         className="flex gap-3"
-                    >
-                        <Button variant="primary" fullWidth className="gap-2 shadow-md shadow-primary/20">
-                            <Share2Icon className="w-5 h-5" />
-                            결과 공유하기
-                        </Button>
-                        <Button
-                            variant="secondary"
-                            className="px-4"
-                            onClick={() => navigate('/test')}
-                            aria-label="다시하기"
-                        >
-                            <RotateCcwIcon className="w-5 h-5" />
-                        </Button>
-                    </motion.div>
+                    ></motion.div>
                 </div>
 
                 {/* Recommendations */}
