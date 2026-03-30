@@ -21,7 +21,7 @@ export const PostFeed: React.FC<PostFeedProps> = ({
     onPostClick,
 }) => {
     return (
-        <div className="px-4 space-y-6">
+        <div className="px-6 space-y-6">
             {posts.map((post, idx) => (
                 <motion.div
                     key={post.id}

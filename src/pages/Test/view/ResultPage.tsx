@@ -1,56 +1,44 @@
 'use client'
 import { motion } from 'framer-motion'
 import { HomeIcon, RotateCcwIcon, Share2Icon } from 'lucide-react'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { PlaceCard } from '../../../components/PlaceCard'
+import { LoadingSpinner } from '../../../components/shared/LoadingSpinner'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
-import { resultTypes, TravelType } from '../../../data/mockData'
-import KakaoMap from './Map'
+import { Place, resultTypes, TravelType } from '../../../data/mockData'
+import { requestGemini } from '../../../data/test/api'
 
 export const ResultPage: React.FC = () => {
-    //const [isLoading, setIsLoading] = useState(true)
+    const [isLoading, setIsLoading] = useState(true)
+    const [recommendedPlaces, setRecommendedPlaces] = useState<Place[]>()
     const { type } = useParams<{
         type: string
     }>()
     const navigate = useNavigate()
     const result = resultTypes[type as TravelType]
-    let recommendedPlaces = [
-        {
-            name: '제주 서귀포 숲길',
-            location: '제주특별자치도 서귀포시',
-            description:
-                '제주의 아름다운 자연 속에서 복잡한 마음을 비우고 온전히 자신에게 집중할 수 있는 힐링 명소입니다. 고즈넉한 숲길을 걷거나 잔잔한 바다를 바라보며 평화로움을 느껴보세요.',
-        },
-        {
-            name: '경주 황리단길',
-            location: '경상북도 경주시',
-            description:
-                '천년고도의 정취가 가득한 황리단길에서 고즈넉한 감성을 느끼고, 고분 사이를 거닐며 고요한 시간을 보낼 수 있습니다. 역사와 자연이 어우러진 공간에서 마음의 평화를 찾아보세요.',
-        },
-        {
-            name: '강릉 안목해변',
-            location: '강원특별자치도 강릉시',
-            description:
-                '푸른 동해바다를 바라보며 여유로운 시간을 보내고, 개성 넘치는 카페에서 향긋한 커피 한 잔과 함께 감성적인 순간을 만끽할 수 있습니다. 바다 내음을 맡으며 온전한 휴식을 즐겨보세요.',
-        },
-    ]
-    /*useEffect(() => {
-        recommendedPlaces = requestGemini(result.title).then(() => {
-            setIsLoading(false)
-        })
 
-        console.log(geminiAnswer)
+    useEffect(() => {
+        requestGemini(result.title)
+            .then((res) => {
+                setRecommendedPlaces(res)
+                console.log('제미나이 호출 성공')
+            })
+            .catch((err) => {
+                console.error('제미나이 호출 실패', err)
+            })
+            .finally(() => {
+                setIsLoading(false)
+            })
 
         if (!result) {
             navigate('/')
         }
-    }, [result, navigate])*/
+    }, [result, navigate])
 
-    //if (isLoading) return <LoadingSpinner />
+    if (isLoading) return <LoadingSpinner />
     if (!result) return null
-
-    //const recommendedPlaces = places.filter((p) => p.type === result.id)
 
     const handleShare = async () => {
         const shareData = {
@@ -155,9 +143,9 @@ export const ResultPage: React.FC = () => {
                         <h2 className="text-xl font-bold text-text">이런 곳은 어때요?</h2>
                     </div>
 
-                    <div>
-                        {recommendedPlaces!.map((map, index) => (
-                            <KakaoMap key={`${map.name}-${index}`} name={map.name} />
+                    <div className="flex flex-col gap-[20px]">
+                        {recommendedPlaces!.map((place, index) => (
+                            <PlaceCard key={`${place.name}-${place.tags[index]}`} place={place} />
                         ))}
                     </div>
                 </motion.div>
@@ -171,6 +159,3 @@ export const ResultPage: React.FC = () => {
         </div>
     )
 }
-
-//{recommendedPlaces.map((place) => (
-//<PlaceCard key={place.id} place={place} />

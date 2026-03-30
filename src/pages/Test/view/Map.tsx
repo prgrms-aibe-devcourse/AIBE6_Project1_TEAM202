@@ -56,13 +56,8 @@ export default function KakaoMap({ name }: KakaoMapProps) {
     if (error) return
 
     return (
-        <div style={{ position: 'relative', width: '100%', height: '350px' }}>
-            <Map
-                center={{ lat: 37.566826, lng: 126.9786567 }}
-                style={{ width: '100%', height: '100%' }}
-                level={3}
-                onCreate={setMap}
-            >
+        <div className="relative w-full h-[350px] overflow-hidden object-cover transition-transform duration-500 hover:scale-110">
+            <Map center={{ lat: 37.566826, lng: 126.9786567 }} className="w-full h-full" level={3} onCreate={setMap}>
                 {places.map((place, i) => (
                     <MapMarker
                         key={`${place.place_name}-${i}`}
@@ -76,42 +71,21 @@ export default function KakaoMap({ name }: KakaoMapProps) {
                         }}
                     >
                         {selected?.place_name === place.place_name && (
-                            <div style={{ padding: '5px', color: '#000' }}>{place.place_name}</div>
+                            <div className="p-[5px] text-black">{place.place_name}</div>
                         )}
                     </MapMarker>
                 ))}
                 <div
                     id="menu_wrap"
-                    className="bg_white"
-                    style={{
-                        position: 'absolute',
-                        top: 10,
-                        left: 10,
-                        width: '150px',
-                        maxHeight: '70%',
-                        overflowY: 'auto',
-                        background: 'rgba(255,255,255,0.9)',
-                        borderRadius: '10px',
-                        padding: '10px',
-                        zIndex: 2,
-                    }}
+                    className="absolute top-[10px] left-[10px] w-[150px] max-h-[40%] overflow-y-auto bg-white/90 rounded-[10px] p-[10px] z-[2]"
                 >
-                    <div className="option">
-                        <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>🔍 "{name}" 검색 결과</div>
-                    </div>
-
                     <hr />
 
                     <ul id="placesList">
                         {places.map((place, i) => (
                             <li
                                 key={i}
-                                className="item"
-                                style={{
-                                    borderBottom: '1px solid #ddd',
-                                    padding: '10px',
-                                    cursor: 'pointer',
-                                }}
+                                className="border-b border-gray-300 p-[5px] cursor-pointer text-[10px]"
                                 onClick={() => {
                                     setSelected(place)
                                     map?.panTo(new window.kakao.maps.LatLng(Number(place.y), Number(place.x)))
@@ -120,20 +94,20 @@ export default function KakaoMap({ name }: KakaoMapProps) {
                                 <span className={`markerbg marker_${i + 1}`} />
 
                                 <div className="info">
-                                    <div style={{ fontWeight: 'bold' }}>
+                                    <div className="font-bold">
                                         {i + 1}. {place.place_name}
                                     </div>
 
                                     {place.road_address_name ? (
                                         <>
                                             <span>{place.road_address_name}</span>
-                                            <span style={{ color: '#888' }}>{place.address_name}</span>
+                                            <span className="text-gray-400">{place.address_name}</span>
                                         </>
                                     ) : (
                                         <span>{place.address_name}</span>
                                     )}
 
-                                    <span style={{ color: 'green' }}>{place.phone}</span>
+                                    <span className="text-green-500">{place.phone}</span>
                                 </div>
                             </li>
                         ))}

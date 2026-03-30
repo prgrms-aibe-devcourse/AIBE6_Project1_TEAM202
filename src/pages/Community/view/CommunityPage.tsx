@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../contexts/AuthContext'
 import { supabase } from '../../../lib/supabase'
-import { getPosts, Post, toggleLike } from '../../../services/testPostApi'
+import { getPosts, Post, PostSortType, toggleLike } from '../../../services/testPostApi'
 import { FilterBar } from '../components/filterBar'
 import { LoginModal } from '../components/LoginModal'
 import { PostFeed } from '../components/postFeed'
+
+import { SortDropdown } from '../components/SortDropdown'
 import { WriteButton } from '../components/writeButton'
 import { useCommunityFilter } from '../hooks/useCommunityFilter'
 
@@ -18,11 +20,12 @@ export const CommunityPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true)
     const [likedPostIds, setLikedPostIds] = useState<string[]>([])
     const [bookmarkedPostIds, setBookmarkedPostIds] = useState<string[]>([])
+    const [sortType, setSortType] = useState<PostSortType>('latest')
 
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const posts = await getPosts()
+                const posts = await getPosts(sortType, activeFilter)
                 console.log('community page post', posts)
                 setAllPosts(posts)
             } catch (error) {
@@ -32,7 +35,7 @@ export const CommunityPage: React.FC = () => {
             }
         }
         fetchPosts()
-    }, [])
+    }, [sortType, activeFilter])
 
     useEffect(() => {
         const fetchBookmarks = async () => {
@@ -73,8 +76,8 @@ export const CommunityPage: React.FC = () => {
         fetchLikes()
     }, [user])
 
-    const filteredPosts =
-        activeFilter === 'ALL' ? allPosts : allPosts.filter((post) => post.travel_type === activeFilter)
+    // const filteredPosts =
+    //     activeFilter === 'ALL' ? allPosts : allPosts.filter((post) => post.travel_type === activeFilter)
 
     const handleLikeClick = async (postId: string) => {
         if (!isAuthenticated || !user?.id) {
@@ -161,17 +164,19 @@ export const CommunityPage: React.FC = () => {
 
     return (
         <div className="min-h-full bg-background pb-24 pt-6 relative">
-            <div className="px-6 mb-6 flex justify-between items-end">
-                <div>
-                    <h1 className="text-2xl font-bold text-text mb-1">여행자 커뮤니티</h1>
-                    <p className="text-sm text-text-muted">다른 여행러들의 이야기를 만나보세요</p>
-                </div>
+            <div className="px-6 mb-6">
+                <h1 className="text-2xl font-bold text-text mb-1">여행자 커뮤니티</h1>
+                <p className="text-sm text-text-muted">다른 여행러들의 이야기를 만나보세요</p>
             </div>
 
             <FilterBar activeFilter={activeFilter} onFilterChange={setActiveFilter} />
 
+            <div className="px-6 flex justify-end mb-4">
+                <SortDropdown activeSort={sortType} onSortChange={setSortType} />
+            </div>
+
             <PostFeed
-                posts={filteredPosts}
+                posts={allPosts}
                 likedPostIds={likedPostIds}
                 bookmarkedPostIds={bookmarkedPostIds}
                 onLikeClick={handleLikeClick}

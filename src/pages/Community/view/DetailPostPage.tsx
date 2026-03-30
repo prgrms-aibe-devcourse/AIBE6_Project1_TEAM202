@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../../../contexts/AuthContext'
 import { supabase } from '../../../lib/supabase'
 import {
@@ -19,6 +19,7 @@ interface LocalComment {
     id: string
     content: string
     createdAt: string
+    userId: string // 댓글 수정을 위한 userId 추가
     author: {
         nickname: string
         avatar: string
@@ -27,13 +28,20 @@ interface LocalComment {
 
 export const DetailPostPage: React.FC = () => {
     const { postId } = useParams<{ postId: string }>()
-    const { user, displayName, profileImage } = useAuth()
+    const { user } = useAuth()
     const [post, setPost] = useState<Post | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [comment, setComment] = useState('')
     const [localComments, setLocalComments] = useState<LocalComment[]>([])
     const [isLiked, setIsLiked] = useState(false)
     const [isBookmarked, setIsBookmarked] = useState(false)
+
+    // 게시물 수정 관련 상태
+    const [editingCommentId, setEditingCommentId] = useState<string | null>(null)
+    const [editingCommentContent, setEditingCommentContent] = useState('')
+
+    // 게시물 삭제시 목록으로 이동
+    const navigate = useNavigate()
 
     useEffect(() => {
         const fetchPost = async () => {
@@ -58,6 +66,7 @@ export const DetailPostPage: React.FC = () => {
                 id: c.id,
                 content: c.content,
                 createdAt: c.created_at,
+                userId: c.user_id,
                 author: {
                     nickname: c.nickname || '익명',
                     avatar: c.avatar_url || '',
@@ -82,6 +91,26 @@ export const DetailPostPage: React.FC = () => {
         }
         fetchUserActions()
     }, [user?.id, postId])
+
+    // 게시물 수정 핸들러
+    const handleEditPost = async (title: string, content: string) => {
+        if (!postId) return
+        const { error } = await supabase.from('posts').update({ title, content }).eq('id', postId)
+        if (!error) {
+            setPost((prev) => (prev ? { ...prev, title, content } : prev))
+        }
+    }
+
+    // 게시물 삭제 핸들러
+    const handleDeletePost = async () => {
+        if (!postId) return
+        const confirmed = window.confirm('게시물을 삭제하시겠습니까?')
+        if (!confirmed) return
+        const { error } = await supabase.from('posts').delete().eq('id', postId)
+        if (!error) {
+            navigate('/community')
+        }
+    }
 
     if (isLoading) {
         return (
@@ -141,6 +170,7 @@ export const DetailPostPage: React.FC = () => {
                 id: c.id,
                 content: c.content,
                 createdAt: c.created_at,
+                userId: c.user_id,
                 author: {
                     nickname: c.nickname || '익명',
                     avatar: c.avatar_url || '',
@@ -154,6 +184,49 @@ export const DetailPostPage: React.FC = () => {
             console.error('댓글 저장 실패:', error)
         }
     }
+
+    const canEditComment = (comment: LocalComment) =>
+        !!user?.id && (user.id === comment.userId || user.id === post.user_id)
+
+    const handleCommentEditStart = (comment: LocalComment) => {
+        setEditingCommentId(comment.id)
+        setEditingCommentContent(comment.content)
+    }
+
+    const handleCommentEditCancel = () => {
+        setEditingCommentId(null)
+        setEditingCommentContent('')
+    }
+
+    const handleCommentEditSave = async (commentId: string) => {
+        if (!editingCommentContent.trim()) return
+        const { error } = await supabase
+            .from('comments')
+            .update({ content: editingCommentContent.trim() })
+            .eq('id', commentId)
+
+        if (error) {
+            console.error('댓글 수정 실패:', error)
+            return
+        }
+
+        setLocalComments((prev) =>
+            prev.map((c) => (c.id === commentId ? { ...c, content: editingCommentContent.trim() } : c)),
+        )
+        setEditingCommentId(null)
+        setEditingCommentContent('')
+    }
+
+    const handleCommentDelete = async (commentId: string) => {
+        const confirmed = window.confirm('댓글을 삭제하시겠습니까?')
+        if (!confirmed) return
+        const { error } = await supabase.from('comments').delete().eq('id', commentId)
+        if (!error) {
+            setLocalComments((prev) => prev.filter((c) => c.id !== commentId))
+            setPost((prev) => (prev ? { ...prev, comment_count: prev.comment_count - 1 } : prev))
+        }
+    }
+
     return (
         <div>
             <div className="p-6">
@@ -161,10 +234,24 @@ export const DetailPostPage: React.FC = () => {
                     post={post}
                     isLiked={isLiked}
                     isBookmarked={isBookmarked}
+                    currentUserId={user?.id ?? null}
+                    onEditPost={handleEditPost}
                     onLikeClick={handleLikeClick}
                     onBookmarkClick={handleBookmarkClick}
+                    onDeletePost={handleDeletePost}
                 />
-                <CommentList comments={localComments} commentCount={localComments.length} />
+                <CommentList
+                    comments={localComments}
+                    commentCount={localComments.length}
+                    editingCommentId={editingCommentId}
+                    editingCommentContent={editingCommentContent}
+                    canEditComment={canEditComment}
+                    onCommentEditStart={handleCommentEditStart}
+                    onCommentEditCancel={handleCommentEditCancel}
+                    onCommentEditSave={handleCommentEditSave}
+                    onEditContentChange={setEditingCommentContent}
+                    onCommentDelete={handleCommentDelete}
+                />
             </div>
             <CommentInput comment={comment} onCommentChange={setComment} onSubmit={handleCommentSubmit} />
         </div>

@@ -25,7 +25,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({ activeFilter, onFilterChan
     }, [activeFilter])
 
     return (
-        <div className="px-6 mb-6 overflow-x-auto hide-scrollbar">
+        <div className="px-6 overflow-x-auto hide-scrollbar">
             <div className="flex gap-2 pb-2">
                 {filters.map((filter) => (
                     <button

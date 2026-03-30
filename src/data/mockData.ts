@@ -10,7 +10,6 @@ export interface Place {
     tags: string[]
     location: string
     type: TravelType
-    gallery: string[]
 }
 
 export type { ResultType } from './models/testTypes'
@@ -47,76 +46,6 @@ export interface Comments {
 }
 
 export { resultTypes } from './mock/resultTypes'
-
-export const places: Place[] = [
-    {
-        id: 'p1',
-        name: '제주 사려니숲길',
-        description:
-            '피톤치드 가득한 삼나무 숲길에서 즐기는 온전한 휴식. 흙을 밟으며 걷다 보면 마음의 평화가 찾아옵니다.',
-        imageUrl: 'https://images.unsplash.com/photo-1542224566-6e85f2e6772f?auto=format&fit=crop&q=80&w=800',
-        tags: ['#자연', '#숲길', '#산책', '#피톤치드'],
-        location: '제주특별자치도 제주시 조천읍',
-        type: 'HEALING',
-        gallery: [
-            'https://images.unsplash.com/photo-1542224566-6e85f2e6772f?auto=format&fit=crop&q=80&w=800',
-            'https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&q=80&w=800',
-            'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=800',
-        ],
-    },
-    {
-        id: 'p2',
-        name: '부산 해운대 블루라인파크',
-        description:
-            '해안 절경을 따라 달리는 로맨틱한 해변열차. 푸른 바다와 도시의 스카이라인이 어우러진 멋진 풍경을 감상하세요.',
-        imageUrl: 'https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?auto=format&fit=crop&q=80&w=800',
-        tags: ['#바다', '#해변열차', '#핫플', '#야경'],
-        location: '부산광역시 해운대구',
-        type: 'SHOPPING',
-        gallery: [
-            'https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?auto=format&fit=crop&q=80&w=800',
-            'https://images.unsplash.com/photo-1580397581145-cb57850228d7?auto=format&fit=crop&q=80&w=800',
-        ],
-    },
-    {
-        id: 'p3',
-        name: '전주 한옥마을 먹거리 골목',
-        description: '길거리 음식의 천국! 비빔밥 고로케부터 치즈구이, 육전까지 끝없이 이어지는 맛의 향연을 즐겨보세요.',
-        imageUrl: 'https://images.unsplash.com/photo-1580397581145-cb57850228d7?auto=format&fit=crop&q=80&w=800',
-        tags: ['#먹방', '#길거리음식', '#전통', '#맛집투어'],
-        location: '전라북도 전주시 완산구',
-        type: 'FOOD',
-        gallery: [
-            'https://images.unsplash.com/photo-1580397581145-cb57850228d7?auto=format&fit=crop&q=80&w=800',
-            'https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&q=80&w=800',
-        ],
-    },
-    {
-        id: 'p4',
-        name: '강릉 안목해변 카페거리',
-        description:
-            '푸른 동해바다를 배경으로 인생샷을 남길 수 있는 곳. 통유리창 너머로 보이는 바다와 함께 커피 한 잔의 여유를.',
-        imageUrl: 'https://images.unsplash.com/photo-1501504905252-473c47e087f8?auto=format&fit=crop&q=80&w=800',
-        tags: ['#오션뷰', '#카페', '#인생샷', '#커피'],
-        location: '강원도 강릉시 창해로',
-        type: 'PHOTO',
-        gallery: [
-            'https://images.unsplash.com/photo-1501504905252-473c47e087f8?auto=format&fit=crop&q=80&w=800',
-            'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&q=80&w=800',
-        ],
-    },
-    {
-        id: 'p5',
-        name: '경주 대릉원 돌담길',
-        description:
-            '고즈넉한 돌담길을 따라 걷다 보면 만나는 평화로운 풍경. 계절마다 바뀌는 자연의 색감을 감상하기 좋아요.',
-        imageUrl: 'https://images.unsplash.com/photo-1598887142487-3c854d50d621?auto=format&fit=crop&q=80&w=800',
-        tags: ['#산책', '#돌담길', '#고즈넉함', '#힐링'],
-        location: '경상북도 경주시 황남동',
-        type: 'HEALING',
-        gallery: ['https://images.unsplash.com/photo-1598887142487-3c854d50d621?auto=format&fit=crop&q=80&w=800'],
-    },
-]
 
 export const mockUsers: User[] = [
     {

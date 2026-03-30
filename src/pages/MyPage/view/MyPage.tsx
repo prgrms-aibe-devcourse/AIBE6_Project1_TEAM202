@@ -164,17 +164,27 @@ export const MyPage: React.FC = () => {
     const handleDeleteAccount = async () => {
         if (!user) return
 
-        const ok = window.confirm('정말 탈퇴하시겠어요?\n탈퇴하면 저장된 정보가 삭제됩니다.')
+        const ok = window.confirm('정말 탈퇴하시겠어요?\n탈퇴 시 서비스 데이터가 삭제되고, 카카오 연결도 해제됩니다.')
         if (!ok) return
 
         try {
-            const { error } = await supabase.from('users').delete().eq('id', user.id)
+            const { data, error } = await supabase.functions.invoke('unlink-kakao-and-delete-account')
 
             if (error) {
-                console.error('회원 탈퇴 실패:', error)
-                alert('회원 탈퇴에 실패했습니다.')
+                console.error('회원 탈퇴 실패 FULL:', error)
+
+                // 🔥 핵심 추가
+                const res = error.context
+                if (res) {
+                    const text = await res.text()
+                    console.error('Edge Function 실제 에러:', text)
+                }
+
+                alert('회원 탈퇴 실패')
                 return
             }
+
+            console.log('unlink 결과:', data)
 
             await logout()
             alert('탈퇴가 완료되었습니다.')

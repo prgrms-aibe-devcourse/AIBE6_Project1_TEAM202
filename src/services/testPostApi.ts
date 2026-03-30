@@ -27,6 +27,7 @@ export interface Post {
     author: PostAuthor | null
 }
 
+export type PostSortType = 'latest' | 'mostLiked' | 'mostCommented'
 export interface Comment {
     id: string
     post_id: string
@@ -82,11 +83,45 @@ export const savePost = async (post: CreatePostInput) => {
 }
 
 // posts 테이블 전체 조회 (저장 확인용)
-export const getPosts = async (): Promise<Post[]> => {
-    const { data, error } = await supabase
-        .from('posts')
-        .select(
-            `
+// export const getPosts = async (): Promise<Post[]> => {
+//     const { data, error } = await supabase
+//         .from('posts')
+//         .select(
+//             `
+//             id,
+//             title,
+//             content,
+//             image_url,
+//             travel_type,
+//             like_count,
+//             comment_count,
+//             user_id,
+//             created_at,
+//             author:users (
+//                 id,
+//                 nickname,
+//                 avatar_url
+//             )
+//         `,
+//         )
+//         .order('created_at', { ascending: false })
+
+//     if (error) {
+//         console.error('getPosts error:', error)
+//         throw error
+//     }
+
+//     const normalizedPosts: Post[] =
+//         data?.map((post) => ({
+//             ...post,
+//             author: Array.isArray(post.author) ? (post.author[0] ?? null) : (post.author ?? null),
+//         })) ?? []
+
+//     return normalizedPosts
+// }
+
+export const getPosts = async (sortType: PostSortType = 'latest', filterType?: string): Promise<Post[]> => {
+    let query = supabase.from('posts').select(`
             id,
             title,
             content,
@@ -101,9 +136,27 @@ export const getPosts = async (): Promise<Post[]> => {
                 nickname,
                 avatar_url
             )
-        `,
-        )
-        .order('created_at', { ascending: false })
+        `)
+
+    // 여행 타입 필터
+    if (filterType && filterType !== 'ALL') {
+        query = query.eq('travel_type', filterType)
+    }
+
+    // 정렬
+    if (sortType === 'latest') {
+        query = query.order('created_at', { ascending: false })
+    }
+
+    if (sortType === 'mostLiked') {
+        query = query.order('like_count', { ascending: false })
+    }
+
+    if (sortType === 'mostCommented') {
+        query = query.order('comment_count', { ascending: false })
+    }
+
+    const { data, error } = await query
 
     if (error) {
         console.error('getPosts error:', error)
@@ -118,6 +171,7 @@ export const getPosts = async (): Promise<Post[]> => {
 
     return normalizedPosts
 }
+
 // 이미지를 Storage에 업로드하고 URL 반환
 export const uploadPostImage = async (file: File): Promise<string> => {
     const fileName = `${Date.now()}_${file.name}`
