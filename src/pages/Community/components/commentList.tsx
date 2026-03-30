@@ -14,7 +14,6 @@ interface Comment {
 
 interface CommentListProps {
     comments: Comment[]
-    commentCount: number
     editingCommentId: string | null
     editingCommentContent: string
     onCommentEditStart: (comment: Comment) => void
@@ -27,7 +26,6 @@ interface CommentListProps {
 
 export const CommentList: React.FC<CommentListProps> = ({
     comments,
-    commentCount,
     editingCommentId,
     editingCommentContent,
     onCommentEditStart,
@@ -39,7 +37,7 @@ export const CommentList: React.FC<CommentListProps> = ({
 }) => {
     return (
         <div className="px-6 py-6 bg-gray-50 min-h-[300px]">
-            <h3 className="font-bold text-text mb-4">댓글 {commentCount}</h3>
+            <h3 className="font-bold text-text mb-4">댓글 {comments.length}</h3>
             <div className="space-y-4">
                 {comments.map((comment) => {
                     const isEditing = editingCommentId === comment.id

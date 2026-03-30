@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import palette from '../../../assets/icons/palette.png'
 import { Button } from '../../../components/ui/Button'
 import { scaleIn } from '../../../core/constants/animation'
 
@@ -20,7 +21,7 @@ export const HomeHeroSection: React.FC = () => {
             transition={{ duration: 0.5 }}
         >
             <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-white shadow-soft">
-                <span className="text-5xl">✈️</span>
+                <img src={palette} className="rounded-full object-cover" />
             </div>
 
             <h1 className="mb-3 text-3xl font-bold text-text text-balance">

@@ -2,6 +2,11 @@ import type { Session, User } from '@supabase/supabase-js'
 import React, { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { supabase } from '../lib/supabase'
 
+// 인증 상태 전역 관리 Context
+// - Supabase 세션 관리
+// - 사용자 정보(user) 상태 유지
+// - 로그인/로그아웃 처리
+// - 최초 로그인 시 users 테이블 프로필 보정
 interface AuthContextType {
     user: User | null
     session: Session | null
@@ -15,6 +20,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
+// 사용자 메타데이터에서 displayName 추출
+// (카카오 로그인 등 다양한 필드 대응)
 const getDisplayName = (user: User | null) => {
     if (!user) return ''
 
@@ -39,6 +46,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [user, setUser] = useState<User | null>(null)
     const [isLoading, setIsLoading] = useState(true)
 
+    // 사용자 프로필을 DB(users 테이블)에 저장/업데이트
+    // 이미 존재하면 무시 (중복 방지)
     const ensureUserProfile = async (user: User) => {
         const { error } = await supabase.from('users').upsert(
             {
@@ -66,7 +75,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             console.error('users 프로필 보정 실패:', error)
         }
     }
-
+    // 초기 앱 실행 시 세션 복원 + 유저 상태 설정
     useEffect(() => {
         const initializeAuth = async () => {
             try {
@@ -99,6 +108,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         initializeAuth()
 
+        // 인증 상태 변경 감지 (로그인/로그아웃)
+        // Supabase listener
         const {
             data: { subscription },
         } = supabase.auth.onAuthStateChange((event, session) => {

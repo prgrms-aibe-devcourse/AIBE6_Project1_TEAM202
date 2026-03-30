@@ -4,13 +4,19 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
+// 회원가입 페이지
+// - 이메일/닉네임/비밀번호 입력 UI 제공
+// - 현재는 카카오 로그인만 지원 (폼은 placeholder 역할)
 
+// 회원가입 입력 상태 관리
 export const SignupPage: React.FC = () => {
     const navigate = useNavigate()
     const [email, setEmail] = useState('')
     const [nickname, setNickname] = useState('')
     const [password, setPassword] = useState('')
 
+    // 회원가입 제출 처리
+    // 현재는 카카오 로그인만 지원하므로 안내 후 로그인 페이지로 이동
     const handleSignup = (e: React.FormEvent) => {
         e.preventDefault()
         alert('현재는 카카오 로그인만 지원합니다.')
@@ -22,6 +28,7 @@ export const SignupPage: React.FC = () => {
             <div className="p-4 flex items-center">
                 <button
                     type="button"
+                    // 뒤로가기 버튼 (이전 페이지로 이동)
                     onClick={() => navigate(-1)}
                     className="p-2 -ml-2 text-text-muted hover:text-text transition-colors"
                 >

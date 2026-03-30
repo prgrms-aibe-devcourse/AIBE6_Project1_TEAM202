@@ -7,6 +7,13 @@ import { Card } from '../../../components/ui/Card'
 import { useAuth } from '../../../contexts/AuthContext'
 import { supabase } from '../../../lib/supabase'
 
+// 마이페이지
+// - 사용자 프로필 조회
+// - 북마크 목록 조회
+// - 내가 작성한 게시글 조회
+// - 로그아웃 및 회원 탈퇴 기능 제공
+
+// users 테이블에서 사용하는 프로필 타입
 type Profile = {
     id: string
     nickname: string | null
@@ -14,7 +21,7 @@ type Profile = {
     created_at: string
     result_type: string | null
 }
-// 프로필 성향 타입 매핑
+// 테스트 결과 타입을 화면용 한글 라벨로 매핑
 const typeLabel: Record<string, string> = {
     HEALING: '감성 힐링 여행가',
     CALM: '고요 추구 여행가',
@@ -23,7 +30,7 @@ const typeLabel: Record<string, string> = {
     SHOPPING: '소비형 도시 탐험가',
     EXPLORER: '개척자형 여행가',
 }
-
+// bookmarks 테이블 데이터 타입
 type Bookmark = {
     id: string
     user_id: string
@@ -47,6 +54,7 @@ export const MyPage: React.FC = () => {
         }
     }, [isAuthenticated, isLoading, navigate])
 
+    // users 테이블에서 현재 사용자 프로필 조회
     useEffect(() => {
         const fetchProfile = async () => {
             if (!user) return
@@ -68,6 +76,7 @@ export const MyPage: React.FC = () => {
         fetchProfile()
     }, [user])
 
+    // bookmarks 테이블에서 현재 사용자의 저장 목록 조회
     useEffect(() => {
         const fetchBookmarks = async () => {
             if (!user) return
@@ -89,6 +98,7 @@ export const MyPage: React.FC = () => {
         fetchBookmarks()
     }, [user])
 
+    // posts 테이블에서 현재 사용자가 작성한 글 조회
     useEffect(() => {
         const fetchMyPosts = async () => {
             if (!user) return
@@ -110,6 +120,7 @@ export const MyPage: React.FC = () => {
         fetchMyPosts()
     }, [user])
 
+    // 선택한 북마크 삭제
     const handleDeleteBookmark = async (bookmarkId: string) => {
         const ok = window.confirm('이 북마크를 삭제할까요?')
         if (!ok) return
@@ -125,6 +136,7 @@ export const MyPage: React.FC = () => {
         setBookmarks((prev) => prev.filter((item) => item.id !== bookmarkId))
     }
 
+    // 선택한 게시글 삭제
     const handleDeletePost = async (postId: string) => {
         const ok = window.confirm('이 게시글을 삭제할까요?')
         if (!ok) return
@@ -161,6 +173,9 @@ export const MyPage: React.FC = () => {
         return null
     }
 
+    // Edge Function 호출
+    // - 카카오 연결 해제
+    // - 계정 및 관련 데이터 삭제 요청
     const handleDeleteAccount = async () => {
         if (!user) return
 
@@ -195,6 +210,8 @@ export const MyPage: React.FC = () => {
         }
     }
 
+    // 화면 표시용 사용자 정보 가공
+    // DB 프로필 정보가 있으면 우선 사용하고, 없으면 AuthContext 값을 fallback으로 사용
     const email = user.email ?? '이메일 정보 없음'
     const nickname = profile?.nickname || displayName
     const avatarSrc = profile?.avatar_url || profileImage || 'https://i.pravatar.cc/150?img=12'

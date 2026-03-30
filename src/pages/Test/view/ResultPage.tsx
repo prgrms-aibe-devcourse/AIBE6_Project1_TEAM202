@@ -12,29 +12,37 @@ import { requestGemini } from '../../../data/test/api'
 
 export const ResultPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true)
-    const [recommendedPlaces, setRecommendedPlaces] = useState<Place[]>()
-    const { type } = useParams<{
-        type: string
-    }>()
+    const [recommendedPlaces, setRecommendedPlaces] = useState<Place[]>([])
+    const { type } = useParams()
     const navigate = useNavigate()
-    const result = resultTypes[type as TravelType]
+    const result = type ? resultTypes[type as TravelType] : undefined
 
     useEffect(() => {
-        requestGemini(result.title)
-            .then((res) => {
-                setRecommendedPlaces(res)
-                console.log('제미나이 호출 성공')
-            })
-            .catch((err) => {
-                console.error('제미나이 호출 실패', err)
-            })
-            .finally(() => {
-                setIsLoading(false)
-            })
-
         if (!result) {
             navigate('/')
         }
+
+        const fetchData = async (retries = 3, delay = 1000) => {
+            try {
+                const res = await requestGemini(result!.title)
+                setRecommendedPlaces(res)
+            } catch (err) {
+                if (process.env.NODE_ENV === 'development') {
+                    console.error(err)
+                }
+
+                if (retries > 0) {
+                    await new Promise((resolve) => setTimeout(resolve, delay))
+                    return fetchData(retries - 1, delay)
+                } else {
+                    console.error('모든 재시도 실패')
+                }
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        fetchData()
     }, [result, navigate])
 
     if (isLoading) return <LoadingSpinner />
@@ -50,6 +58,7 @@ export const ResultPage: React.FC = () => {
             if (navigator.share) {
                 await navigator.share(shareData)
                 console.log('공유 성공!')
+                return
             } else {
                 await navigator.clipboard.writeText(window.location.href)
                 alert('링크가 클립보드에 복사되었습니다!')
@@ -143,9 +152,9 @@ export const ResultPage: React.FC = () => {
                         <h2 className="text-xl font-bold text-text">이런 곳은 어때요?</h2>
                     </div>
 
-                    <div className="flex flex-col gap-[20px]">
-                        {recommendedPlaces!.map((place, index) => (
-                            <PlaceCard key={`${place.name}-${place.tags[index]}`} place={place} />
+                    <div className="flex flex-col gap-5">
+                        {recommendedPlaces.map((place) => (
+                            <PlaceCard key={`${place.name}-${place.location}`} place={place} />
                         ))}
                     </div>
                 </motion.div>

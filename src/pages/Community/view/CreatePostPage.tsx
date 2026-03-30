@@ -1,65 +1,31 @@
 import { motion } from 'framer-motion'
 import { ChevronLeftIcon } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../../../components/ui/Button'
-import { useAuth } from '../../../contexts/AuthContext'
-import { TravelType } from '../../../data/mockData'
-import { savePost, uploadPostImage } from '../../../services/testPostApi'
 import { ImageUploader } from '../components/imageUploader'
 import { PostForm } from '../components/postForm'
 import { TravelTypeSelector } from '../components/travelTypeSelector'
+import { useCreatePost } from '../hooks/useCreatePost'
 
 export const CreatePostPage: React.FC = () => {
     const navigate = useNavigate()
-    const [title, setTitle] = useState('')
-    const [content, setContent] = useState('')
-    const [selectedType, setSelectedType] = useState<TravelType>('HEALING')
-    const [imagePreview, setImagePreview] = useState<string | null>(null)
-    const [imageFile, setImageFile] = useState<File | null>(null)
-    const { isAuthenticated, user } = useAuth()
-
-    useEffect(() => {
-        if (!isAuthenticated) {
-            navigate('/login')
-        }
-    }, [isAuthenticated, navigate])
-
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (file) {
-            setImageFile(file)
-            const reader = new FileReader()
-            reader.onloadend = () => setImagePreview(reader.result as string)
-            reader.readAsDataURL(file)
-        }
-    }
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        if (!title || !content || !imageFile) {
-            return
-        }
-        try {
-            const image_url = await uploadPostImage(imageFile)
-
-            await savePost({
-                title,
-                content,
-                image_url,
-                travel_type: selectedType,
-                user_id: user?.id,
-            })
-
-            navigate('/community')
-        } catch (error) {
-            console.error('저장 실패:', error)
-        }
-    }
+    const {
+        title,
+        content,
+        selectedType,
+        imagePreview,
+        imageFile,
+        setTitle,
+        setContent,
+        setSelectedType,
+        handleImageChange,
+        handleImageRemove,
+        handleSubmit,
+    } = useCreatePost()
 
     return (
         <div className="min-h-full bg-background flex flex-col pb-safe">
-            {/* Header */}
             <div className="bg-white/80 backdrop-blur-md sticky top-0 z-10 px-4 py-3 flex items-center justify-between border-b border-gray-100">
                 <button
                     onClick={() => navigate(-1)}
@@ -77,12 +43,8 @@ export const CreatePostPage: React.FC = () => {
                         <ImageUploader
                             imagePreview={imagePreview}
                             onImageChange={handleImageChange}
-                            onImageRemove={() => {
-                                setImagePreview(null)
-                                setImageFile(null)
-                            }}
+                            onImageRemove={handleImageRemove}
                         />
-
                         <p className="text-xs text-text-muted px-1">* 대표 이미지는 필수로 등록해야 해요.</p>
                     </div>
 

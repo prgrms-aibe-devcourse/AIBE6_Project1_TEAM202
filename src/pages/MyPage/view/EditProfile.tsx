@@ -6,6 +6,12 @@ import { Card } from '../../../components/ui/Card'
 import { useAuth } from '../../../contexts/AuthContext'
 import { supabase } from '../../../lib/supabase'
 
+// 프로필 수정 페이지
+// - 사용자 프로필 조회
+// - 닉네임 및 프로필 이미지 수정
+// - Supabase users 테이블 업데이트
+
+// users 테이블 프로필 타입
 type Profile = {
     id: string
     nickname: string | null
@@ -24,12 +30,15 @@ export const EditProfile: React.FC = () => {
     const [imageFile, setImageFile] = useState<File | null>(null)
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
+    // 인증되지 않은 사용자는 로그인 페이지로 리다이렉트
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {
             navigate('/login')
         }
     }, [isAuthenticated, isLoading, navigate])
 
+    // 기존 사용자 프로필 조회 후 입력값 초기화
+    // users 테이블에서 현재 사용자 프로필 조회
     useEffect(() => {
         const fetchProfile = async () => {
             if (!user) return
@@ -56,6 +65,10 @@ export const EditProfile: React.FC = () => {
         fetchProfile()
     }, [user])
 
+    // 프로필 저장 처리
+    // - 닉네임 검증
+    // - 이미지 업로드 (선택)
+    // - users 테이블 업데이트
     const handleSave = async () => {
         if (!user) return
 
@@ -65,10 +78,10 @@ export const EditProfile: React.FC = () => {
             alert('닉네임을 입력해주세요.')
             return
         }
-        // 수정에 프로필 수정 추가
         try {
             setIsSaving(true)
             let newAvatarUrl = profile?.avatar_url
+            //프로필 이미지가 선택된 경우 Storage에 업로드
             if (imageFile) {
                 const fileExt = imageFile.name.split('.').pop()
                 const fileName = `${user.id}_${Date.now()}.${fileExt}`
@@ -96,6 +109,8 @@ export const EditProfile: React.FC = () => {
                 return
             }
 
+            await supabase.auth.refreshSession()
+
             alert('닉네임과 프로필이 저장되었습니다.')
             navigate('/my')
         } catch (error) {
@@ -105,7 +120,7 @@ export const EditProfile: React.FC = () => {
             setIsSaving(false)
         }
     }
-
+    // 인증 또는 프로필 데이터 로딩 중일 때 표시
     if (isLoading || isFetching) {
         return (
             <div className="min-h-full flex items-center justify-center">
@@ -114,6 +129,7 @@ export const EditProfile: React.FC = () => {
         )
     }
 
+    // 로그인되지 않은 경우 렌더링 중단
     if (!user) {
         return null
     }

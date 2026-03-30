@@ -32,35 +32,37 @@ export default function KakaoMap({ name }: KakaoMapProps) {
     })
 
     useEffect(() => {
-        if (!map || loading) return
+        if (!map || loading || !name) return
 
         const ps = new window.kakao.maps.services.Places()
 
-        ps.keywordSearch(name, (data: any[], status: any) => {
-            if (status === window.kakao.maps.services.Status.OK) {
-                const bounds = new window.kakao.maps.LatLngBounds()
+        const callback = (data: PlaceType[], status: kakao.maps.services.Status) => {
+            if (status !== window.kakao.maps.services.Status.OK) return
 
-                const sliced = data.slice(0, 5)
-                setPlaces(sliced)
+            const bounds = new window.kakao.maps.LatLngBounds()
+            const sliced = data.slice(0, 5)
 
-                sliced.forEach((place) => {
-                    bounds.extend(new window.kakao.maps.LatLng(Number(place.y), Number(place.x)))
-                })
+            setPlaces(sliced)
 
-                map.setBounds(bounds)
-            }
-        })
+            sliced.forEach((place) => {
+                bounds.extend(new window.kakao.maps.LatLng(Number(place.y), Number(place.x)))
+            })
+
+            map.setBounds(bounds)
+        }
+
+        ps.keywordSearch(name, callback)
     }, [map, name, loading])
 
-    if (loading) return
-    if (error) return
+    if (loading) return <div>로딩중...</div>
+    if (error) return <div>에러 발생</div>
 
     return (
-        <div className="relative w-full h-[350px] overflow-hidden object-cover transition-transform duration-500 hover:scale-110">
+        <div className="relative w-full h-[350px] overflow-hidden transition-transform duration-500 hover:scale-110">
             <Map center={{ lat: 37.566826, lng: 126.9786567 }} className="w-full h-full" level={3} onCreate={setMap}>
                 {places.map((place, i) => (
                     <MapMarker
-                        key={`${place.place_name}-${i}`}
+                        key={`${place.place_name}-${place.x}-${place.y}`}
                         position={{
                             lat: Number(place.y),
                             lng: Number(place.x),
@@ -70,7 +72,7 @@ export default function KakaoMap({ name }: KakaoMapProps) {
                             map?.panTo(new window.kakao.maps.LatLng(Number(place.y), Number(place.x)))
                         }}
                     >
-                        {selected?.place_name === place.place_name && (
+                        {selected?.x === place.x && selected?.y === place.y && (
                             <div className="p-[5px] text-black">{place.place_name}</div>
                         )}
                     </MapMarker>
