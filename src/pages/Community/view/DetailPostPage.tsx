@@ -1,10 +1,16 @@
+import { ChevronLeftIcon, HomeIcon } from 'lucide-react'
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import { CommentInput } from '../components/commentInput'
 import { CommentList } from '../components/commentList'
 import { PostContent } from '../components/postContent'
 import { useDetailPost } from '../hooks/useDetailPost'
 
 export const DetailPostPage: React.FC = () => {
+    const navigate = useNavigate()
+    const handleGoBack = () => {
+        navigate('/community')
+    }
     const {
         post,
         isLoading,
@@ -53,6 +59,20 @@ export const DetailPostPage: React.FC = () => {
     return (
         <div>
             <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                    <button
+                        onClick={handleGoBack}
+                        className="flex items-center gap-1.5 text-sm text-text-muted hover:text-primary transition-colors"
+                    >
+                        <ChevronLeftIcon className="w-6 h-6" />
+                    </button>
+                    <button
+                        onClick={() => navigate('/')}
+                        className="p-2 -mr-2 text-text-muted hover:text-text transition-colors"
+                    >
+                        <HomeIcon className="w-6 h-6" />
+                    </button>
+                </div>
                 <PostContent
                     post={post}
                     isLiked={isLiked}

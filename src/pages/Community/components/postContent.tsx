@@ -1,7 +1,6 @@
 import {
     BookmarkIcon,
     CheckIcon,
-    ChevronLeftIcon,
     HeartIcon,
     ImageIcon,
     MessageCircleIcon,
@@ -59,22 +58,8 @@ export const PostContent: React.FC<PostContentProps> = ({
         handleImageChange,
     } = usePostEdit(post, onEditPost)
 
-    const handleGoBack = () => {
-        navigate('/community')
-    }
-
     return (
         <div>
-            {/* 뒤로가기 버튼 */}
-            <div className="mb-4">
-                <button
-                    onClick={handleGoBack}
-                    className="flex items-center gap-1.5 text-sm text-text-muted hover:text-primary transition-colors"
-                >
-                    <ChevronLeftIcon className="w-4 h-4" />
-                    뒤로가기
-                </button>
-            </div>
             {/* 작성자 영역 버튼 분리 */}
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
