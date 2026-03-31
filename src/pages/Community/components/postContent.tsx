@@ -9,7 +9,6 @@ import {
     XIcon,
 } from 'lucide-react'
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
 import { resultTypes } from '../../../data/mockData'
 import { Post } from '../../../services/testPostApi'
 import { usePostEdit } from '../hooks/usePostEdit'
@@ -40,7 +39,6 @@ export const PostContent: React.FC<PostContentProps> = ({
     onEditPost,
     onDeletePost,
 }) => {
-    const navigate = useNavigate()
     const travelTypeInfo = resultTypes[post.travel_type as keyof typeof resultTypes]
     const isAuthor = !!currentUserId && currentUserId === post.user_id
 
