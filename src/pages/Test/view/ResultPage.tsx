@@ -10,6 +10,23 @@ import { Card } from '../../../components/ui/Card'
 import { Place, resultTypes, TravelType } from '../../../data/mockData'
 import { requestGemini } from '../../../data/test/api'
 
+const isValidPlace = (obj: any): obj is Place => {
+    return (
+        typeof obj === 'object' &&
+        obj !== null &&
+        typeof obj.name === 'string' &&
+        typeof obj.description === 'string' &&
+        Array.isArray(obj.tags) &&
+        obj.tags.every((tag: any): tag is string => typeof tag === 'string') &&
+        typeof obj.location === 'string' &&
+        ['HEALING', 'SHOPPING', 'FOOD', 'PHOTO', 'CALM', 'EXPLORER'].includes(obj.type)
+    )
+}
+
+const isValidPlaceArray = (arr: any): arr is Place[] => {
+    return Array.isArray(arr) && arr.every(isValidPlace)
+}
+
 export const ResultPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true)
     const [recommendedPlaces, setRecommendedPlaces] = useState<Place[]>([])
@@ -22,27 +39,37 @@ export const ResultPage: React.FC = () => {
             navigate('/')
         }
 
-        const fetchData = async (retries = 3, delay = 1000) => {
-            try {
-                const res = await requestGemini(result!.title)
-                setRecommendedPlaces(res)
-            } catch (err) {
-                if (process.env.NODE_ENV === 'development') {
-                    console.error(err)
-                }
+        const fetchPlaces = async () => {
+            const fetchPlacesWithRetry = async (retries = 3, delay = 1000): Promise<Place[]> => {
+                try {
+                    const res = await requestGemini(result!.title)
 
-                if (retries > 0) {
-                    await new Promise((resolve) => setTimeout(resolve, delay))
-                    return fetchData(retries - 1, delay)
-                } else {
-                    console.error('모든 재시도 실패')
+                    if (!isValidPlaceArray(res)) {
+                        throw new Error('응답이 Place 구조와 맞지 않음')
+                    }
+
+                    setRecommendedPlaces(res)
+                    return res
+                } catch (err) {
+                    if (process.env.NODE_ENV === 'development') {
+                        console.error(err)
+                    }
+
+                    if (retries > 0) {
+                        await new Promise((resolve) => setTimeout(resolve, delay))
+                        return fetchPlacesWithRetry(retries - 1, delay)
+                    } else {
+                        console.error('모든 재시도 실패')
+                        return []
+                    }
+                } finally {
+                    setIsLoading(false)
                 }
-            } finally {
-                setIsLoading(false)
             }
+            await fetchPlacesWithRetry()
         }
 
-        fetchData()
+        fetchPlaces()
     }, [result, navigate])
 
     if (isLoading) return <LoadingSpinner />

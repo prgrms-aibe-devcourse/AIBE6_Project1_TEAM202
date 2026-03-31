@@ -2,19 +2,11 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../../../contexts/AuthContext'
 import { supabase } from '../../../lib/supabase'
-import {
-    Comment,
-    getComments,
-    getPostById,
-    Post,
-    saveComment,
-    toggleBookmark,
-    toggleLike,
-} from '../../../services/testPostApi'
+import { getComments, getPostById, Post, saveComment, toggleBookmark, toggleLike } from '../../../services/testPostApi'
 import { LocalComment } from '../types/comment'
 import { useCommentEditor } from './useCommentEditor'
 
-export const convertComments = (data: Comment[]): LocalComment[] =>
+const convertComments = (data: any[]): LocalComment[] =>
     data.map((c) => ({
         id: c.id,
         content: c.content,
@@ -77,11 +69,11 @@ export const useDetailPost = () => {
         fetchUserActions()
     }, [user?.id, postId])
 
-    const handleEditPost = async (title: string, content: string) => {
+    const handleEditPost = async (title: string, content: string, imageUrl: string) => {
         if (!postId) return
-        const { error } = await supabase.from('posts').update({ title, content }).eq('id', postId)
+        const { error } = await supabase.from('posts').update({ title, content, image_url: imageUrl }).eq('id', postId)
         if (!error) {
-            setPost((prev) => (prev ? { ...prev, title, content } : prev))
+            setPost((prev) => (prev ? { ...prev, title, content, image_url: imageUrl } : prev))
         }
     }
 

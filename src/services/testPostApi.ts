@@ -222,22 +222,61 @@ export const getPostById = async (postId: string): Promise<Post | null> => {
 
 // 북마크
 export const toggleBookmark = async (postId: string, userId: string): Promise<boolean> => {
-    const { data: existing } = await supabase
+    // 이미 북마크가 있는지 확인
+    const { data: existing, error: existingError } = await supabase
         .from('bookmarks')
         .select('id')
         .eq('post_id', postId)
         .eq('user_id', userId)
         .maybeSingle()
 
-    if (existing) {
-        const { error } = await supabase.from('bookmarks').delete().eq('post_id', postId).eq('user_id', userId)
-        if (error) console.error('북마크 삭제 실패:', error)
-        return false
-    } else {
-        const { error } = await supabase.from('bookmarks').insert({ post_id: postId, user_id: userId })
-        if (error) console.error('북마크 저장 실패:', error)
-        return true
+    if (existingError) {
+        console.error('북마크 조회 실패:', existingError)
+        throw existingError
     }
+
+    // 이미 있으면 삭제
+    if (existing) {
+        const { error: deleteError } = await supabase
+            .from('bookmarks')
+            .delete()
+            .eq('id', existing.id)
+
+        if (deleteError) {
+            console.error('북마크 삭제 실패:', deleteError)
+            throw deleteError
+        }
+
+        return false
+    }
+
+    // 게시글 제목 조회
+    const { data: post, error: postError } = await supabase
+        .from('posts')
+        .select('title')
+        .eq('id', postId)
+        .single()
+
+    if (postError) {
+        console.error('게시글 제목 조회 실패:', postError)
+        throw postError
+    }
+
+    // 없으면 추가
+    const { error: insertError } = await supabase
+        .from('bookmarks')
+        .insert({
+            user_id: userId,
+            post_id: postId,
+            place_name: post.title,
+        })
+
+    if (insertError) {
+        console.error('북마크 저장 실패:', insertError)
+        throw insertError
+    }
+
+    return true
 }
 
 export const getBookmarkedPostIds = async (userId: string): Promise<string[]> => {

@@ -3,6 +3,7 @@ import {
     CheckIcon,
     ChevronLeftIcon,
     HeartIcon,
+    ImageIcon,
     MessageCircleIcon,
     PencilIcon,
     TrashIcon,
@@ -20,9 +21,11 @@ interface PostContentProps {
     isBookmarked: boolean
     currentUserId?: string | null
     commentCount: number
+    editedImageFile?: File | null
+    editedImagePreview?: string | null
     onLikeClick: (e: React.MouseEvent) => void
     onBookmarkClick: (e: React.MouseEvent) => void
-    onEditPost?: (title: string, content: string) => Promise<void>
+    onEditPost?: (title: string, content: string, image_url: string) => Promise<void>
     onDeletePost?: () => Promise<void>
 }
 
@@ -32,6 +35,7 @@ export const PostContent: React.FC<PostContentProps> = ({
     isBookmarked,
     currentUserId,
     commentCount,
+    editedImagePreview,
     onLikeClick,
     onBookmarkClick,
     onEditPost,
@@ -52,6 +56,7 @@ export const PostContent: React.FC<PostContentProps> = ({
         setEditedContent,
         handleSave,
         handleCancel,
+        handleImageChange,
     } = usePostEdit(post, onEditPost)
 
     const handleGoBack = () => {
@@ -129,10 +134,24 @@ export const PostContent: React.FC<PostContentProps> = ({
             )}
 
             {/* 이미지 */}
-            {post.image_url && (
-                <div className="rounded-2xl overflow-hidden mb-6 bg-gray-100">
-                    <img src={post.image_url} alt="게시글 이미지" className="w-full h-auto object-cover" />
+            {isEditing ? (
+                <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 mb-6">
+                    {editedImagePreview && (
+                        <img src={editedImagePreview} alt="Preview" className="w-full h-full object-cover" />
+                    )}
+                    {/* 이미지 위에 반투명 오버레이로 교체 버튼 표시 */}
+                    <label className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 cursor-pointer hover:bg-black/50 transition-colors">
+                        <ImageIcon className="w-8 h-8 text-white mb-1" />
+                        <span className="text-white text-sm font-medium">이미지 교체</span>
+                        <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+                    </label>
                 </div>
+            ) : (
+                post.image_url && (
+                    <div className="rounded-2xl overflow-hidden mb-6 bg-gray-100">
+                        <img src={post.image_url} alt="게시글 이미지" className="w-full h-auto object-cover" />
+                    </div>
+                )
             )}
 
             {/* 게시글 내용 */}

@@ -27,8 +27,6 @@ export async function requestGemini(request: string) {
             } catch (e: any) {
                 if (!e.message?.includes('429')) throw e
             }
-
-            console.log(model)
         }
         throw new Error('All models quota exceeded')
     })()
